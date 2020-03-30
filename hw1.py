@@ -44,14 +44,15 @@ def examineFile(filePath):
     print(len(userList))
     print('++++++')
 
-    # for user in userList:
-    getPosts(filePath, userList)
+    # get posts by user as dictionary. KEY='user'
+    postsByUser = getPosts(filePath, userList)
 
-        # print('INSIDE-----------------------------------------------')
-        # print('Username: ' + user)
-        # for post in userPosts:
-        #     print(post)
-        # print()
+    print('AFTER:')
+    print(len(postsByUser))
+
+    print(postsByUser[userList[0]])
+    print(postsByUser[userList[1]])
+    print(postsByUser[userList[2]])
 
     pass
 
@@ -71,10 +72,7 @@ def getPosts(filePath, userList):
         print('*********************************')
         print()
 
-        print(postsByUser[userList[0]])
-        print(postsByUser[userList[1]])
-        print(postsByUser[userList[2]])
-    return userPosts
+    return postsByUser
 
 
 
