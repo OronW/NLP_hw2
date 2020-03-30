@@ -1,9 +1,11 @@
 import sys
 import os
 import csv
+from collections import defaultdict
 
 
 # TODO: make path of directory an input by user before sending
+
 directory = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Input'    # absolute path of folder
 outputDir = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Output'    # absolute path of folder
 
@@ -38,24 +40,42 @@ def main(directory, numOfUsers, outputDir):     # directory=sys.argv[1], numOfUs
 def examineFile(filePath):
 
     userList = createUserList(filePath)
-    print('INSIDE')
     print(userList)
     print(len(userList))
+    print('++++++')
 
-    for user in userList:
-        readPosts(filePath, user)
-        break
+    # for user in userList:
+    getPosts(filePath, userList)
+
+        # print('INSIDE-----------------------------------------------')
+        # print('Username: ' + user)
+        # for post in userPosts:
+        #     print(post)
+        # print()
 
     pass
 
 
-def readPosts(filePath, user):
+def getPosts(filePath, userList):
     with open(filePath, 'r', encoding="utf8") as csvFile:
         currentFile = csv.reader(csvFile, delimiter=',')
 
+        postsByUser = {user: [] for user in userList}
+
+        userPosts = []
+
         for row in currentFile:
-            if row[0] == user:
-                print(row[3])
+            postsByUser[row[0]].append(row[3])
+
+        print()
+        print('*********************************')
+        print()
+
+        print(postsByUser[userList[0]])
+        print(postsByUser[userList[1]])
+        print(postsByUser[userList[2]])
+    return userPosts
+
 
 
 
