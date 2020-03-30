@@ -40,33 +40,26 @@ def main(directory, numOfUsers, outputDir):     # directory=sys.argv[1], numOfUs
 def examineFile(filePath):
 
     userList = createUserList(filePath)
-    print(userList)
-    print(len(userList))
-    print('++++++')
 
     # get posts by user as dictionary. KEY='user'
     postsByUser = getPosts(filePath, userList)
 
-    print('AFTER:')
-    print(len(postsByUser))
+    currentUser = postsByUser[userList[0]]
 
-    print(postsByUser[userList[0]])
-    print(postsByUser[userList[1]])
-    print(postsByUser[userList[2]])
+    print(currentUser[])
 
     pass
+
 
 
 def getPosts(filePath, userList):
     with open(filePath, 'r', encoding="utf8") as csvFile:
         currentFile = csv.reader(csvFile, delimiter=',')
 
-        postsByUser = {user: [] for user in userList}
-
-        userPosts = []
+        postsByUser = {user: [] for user in userList}   # create a dictionary of posts by user. KEY='user'
 
         for row in currentFile:
-            postsByUser[row[0]].append(row[3])
+            postsByUser[row[0]].append([row[3]])
 
         print()
         print('*********************************')
