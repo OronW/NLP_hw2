@@ -35,30 +35,44 @@ def main(directory, numOfUsers, outputDir):     # directory=sys.argv[1], numOfUs
 
 
 
-def examineFile(file):
+def examineFile(filePath):
 
-    userList = createUserList(file)
+    userList = createUserList(filePath)
     print('INSIDE')
     print(userList)
+    print(len(userList))
+
+    for user in userList:
+        readPosts(filePath, user)
+        break
 
     pass
 
 
+def readPosts(filePath, user):
+    with open(filePath, 'r', encoding="utf8") as csvFile:
+        currentFile = csv.reader(csvFile, delimiter=',')
+
+        for row in currentFile:
+            if row[0] == user:
+                print(row[3])
 
 
 
-def createUserList(file):
-    with open(file, 'r', encoding="utf8") as csvFile:
+
+
+
+
+
+def createUserList(filePath):
+    with open(filePath, 'r', encoding="utf8") as csvFile:
         currentFile = csv.reader(csvFile, delimiter=',')
 
         userList = []
-        numOfUsers = 0
         currentUser = ""
 
         for row in currentFile:
-            # print(currentUser)
             if row[0] != currentUser:
-                numOfUsers += 1
                 currentUser = row[0]
                 userList.append(row[0])
 
