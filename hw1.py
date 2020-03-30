@@ -23,7 +23,7 @@ def main(directory, numOfUsers, outputDir):     # directory=sys.argv[1], numOfUs
             file = open(path, 'r', encoding="utf8")
             lines = file.read()
             # print(file)     # prints the name of file
-            # print()     # prints line
+
 
             # TODO: change file name to name of user, after list is filled
             f = open(outputDir + "\\" + currentFile[:-4] + '.txt', 'w+')   # create a file with name of "file" .txt.  w+ is write privileges
