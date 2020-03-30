@@ -46,7 +46,8 @@ def examineFile(filePath):
 
     currentUser = postsByUser[userList[0]]
 
-    print(currentUser[])
+
+    print(currentUser[5])
 
     pass
 
@@ -59,7 +60,7 @@ def getPosts(filePath, userList):
         postsByUser = {user: [] for user in userList}   # create a dictionary of posts by user. KEY='user'
 
         for row in currentFile:
-            postsByUser[row[0]].append([row[3]])
+            postsByUser[row[0]].append(row[3])
 
         print()
         print('*********************************')
