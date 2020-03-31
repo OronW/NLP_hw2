@@ -62,19 +62,49 @@ def analyzePosts(userPosts):
     for post in userPosts:
         print(post)
 
-    for post in userPosts:
-        for i in range(0, len(post)):
-            if post[i] == '.':
-                sentences.append(post[start:i+1])
-                start = i+1
-        start = 0
+    userPosts = cleanPosts(userPosts)
+    sentences = makeSentences(userPosts)
+    # sentences = tokenize(sentences)
 
+
+    print()
+    print('HERE')
     print()
 
     for sentence in sentences:
         print(sentence)
     pass
 
+
+def cleanPosts(userPosts):
+    cleanedPosts = []
+
+    for post in userPosts:
+
+        # currentPost = cleanLinks(post) # if starts with a URL structure - delete the link
+        # currentPost = cleansymbols(currentPost) # if there is any symbol - delete the "word" between left and right space
+
+        # cleanedPosts.append(currentPost)  # after all is cleaned - append to list
+
+        if post.startswith('http'):
+            x = slice(1, 3)
+            cleanedPosts.append((post[x]))
+        else:
+            cleanedPosts.append(post)
+
+
+    return cleanedPosts
+
+def makeSentences(userPosts):
+    sentences = []
+    start = 0
+    for post in userPosts:
+        for i in range(0, len(post)):
+            if post[i] == '.' or i == len(post)-1:
+                sentences.append(post[start:i + 1])
+                start = i + 1
+        start = 0
+    return sentences
 
 
 
