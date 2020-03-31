@@ -13,6 +13,7 @@ outputDir = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Output'    # absolute 
 
 def main(directory, numOfUsers, outputDir):     # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]
 
+
     # directory = input()
     print()
 
@@ -44,12 +45,36 @@ def examineFile(filePath):
     # get posts by user as dictionary. KEY='user'
     postsByUser = getPosts(filePath, userList)
 
-    currentUser = postsByUser[userList[0]]
+    # TODO: remove list bound for all users. This is just for testings
+    for user in userList[:1]:
+        currentUserPosts = postsByUser[user]    # this is an array with all the posts of one user
+        analyzePosts(currentUserPosts)
+
+        print(currentUserPosts)
 
 
-    print(currentUser[5])
 
+def analyzePosts(userPosts):
+
+    start = 0
+    sentences = []  # this list will contain all the sentences of a user, derived from his/her posts
+
+    for post in userPosts:
+        print(post)
+
+    for post in userPosts:
+        for i in range(0, len(post)):
+            if post[i] == '.':
+                sentences.append(post[start:i+1])
+                start = i+1
+        start = 0
+
+    print()
+
+    for sentence in sentences:
+        print(sentence)
     pass
+
 
 
 
