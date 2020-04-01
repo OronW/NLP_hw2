@@ -1,6 +1,7 @@
 import sys
 import os
 import csv
+import re
 from collections import defaultdict
 
 # TODO: make path of directory an input by user before sending
@@ -41,9 +42,12 @@ def examineFile(filePath):
     postsByUser = getPosts(filePath, userList)
 
     # TODO: remove list bound for all users. This is just for testings
-    for user in userList[:1]:
+    for user in userList[:2]:
         currentUserPosts = postsByUser[user]  # this is an array with all the posts of one user
         analyzePosts(currentUserPosts)
+        print('***********************')
+        print("Finished current user")
+        print('***********************')
 
         # print(currentUserPosts)
 
@@ -97,18 +101,11 @@ def cleanLinks(post):
 def makeSentences(userPosts):
     sentences = []
     start = 0
+
     for post in userPosts:
-        for i in range(0, len(post)):
-            if post[i:].startswith('..'):
-                print("SUCCESS!")
-                sentences.append(post[start:i + 2])
-                if i+2 != len(post)-1:
-                    start = i + 2
-                    i = i+2
-            elif post[i] == '.' or post[i] == '?' or post[i] == '!' or i == len(post) - 1:
-                sentences.append(post[start:i + 1])
-                start = i + 1
-        start = 0
+        sentences.extend((re.findall('.*?[.?]+|.+$', post)))     # this regex split the post by relevant characters, or by the end of the line
+
+
     return sentences
 
 
