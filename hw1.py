@@ -42,34 +42,35 @@ def examineFile(filePath):
     postsByUser = getPosts(filePath, userList)
 
     # TODO: remove list bound for all users. This is just for testings
-    for user in userList[:2]:
+    for user in userList:
         currentUserPosts = postsByUser[user]  # this is an array with all the posts of one user
-        analyzePosts(currentUserPosts)
-        print('***********************')
-        print("Finished current user")
-        print('***********************')
+        userSentences = analyzePosts(currentUserPosts)
+        # print('***********************')
+        # print("Finished user " + user)
+        # print('***********************')
 
-        # print(currentUserPosts)
+        # for sentence in userSentences:
+        #     print(sentence.lstrip())
+        postsByUser[user] = userSentences
+
+    print(postsByUser['2dplox'])
+    print(len(postsByUser['2dplox']))
+    print(postsByUser['AccurateObjective'])
+    print(len(postsByUser['AccurateObjective']))
 
 
 def analyzePosts(userPosts):
     start = 0
     sentences = []  # this list will contain all the sentences of a user, derived from his/her posts
 
-    for post in userPosts:
-        print(post)
+    # for post in userPosts:
+    #     print(post)
 
     userPosts = cleanPosts(userPosts)
     sentences = makeSentences(userPosts)
     # sentences = tokenize(sentences)
 
-    print()
-    print('HERE')
-    print()
-
-    for sentence in sentences:
-        print(sentence.lstrip())
-    pass
+    return sentences
 
 
 def cleanPosts(userPosts):
@@ -89,10 +90,13 @@ def cleanLinks(post):
     splitPost = post.split()
 
     for i in splitPost:
-        if not i.startswith('http') or \
-                '@' in i or \
-                '#' in i or \
-                '^' in i:
+        if 'http' not in i and \
+                '@' not in i and \
+                '#' not in i and \
+                '^' not in i and \
+                '*' not in i and \
+                '&gt'not in i and \
+                not i.startswith('['):
             cleanedPost = cleanedPost + ' ' + i
 
     return cleanedPost
@@ -103,7 +107,7 @@ def makeSentences(userPosts):
     start = 0
 
     for post in userPosts:
-        sentences.extend((re.findall('.*?[.?]+|.+$', post)))     # this regex split the post by relevant characters, or by the end of the line
+        sentences.extend((re.findall('.*?[.?!]+|.+$', post)))     # this regex split the post by relevant characters, or by the end of the line
 
 
     return sentences
