@@ -38,6 +38,8 @@ def main(directory, numOfUsers, outputDir):  # directory=sys.argv[1], numOfUsers
 def examineFile(filePath):
     userList = createUserList(filePath)
 
+    userSizeList = []
+
     # get posts by user as dictionary. KEY='user'
     postsByUser = getPosts(filePath, userList)
 
@@ -45,18 +47,21 @@ def examineFile(filePath):
     for user in userList:
         currentUserPosts = postsByUser[user]  # this is an array with all the posts of one user
         userSentences = analyzePosts(currentUserPosts)
-        # print('***********************')
-        # print("Finished user " + user)
-        # print('***********************')
 
         # for sentence in userSentences:
         #     print(sentence.lstrip())
         postsByUser[user] = userSentences
 
-    print(postsByUser['2dplox'])
-    print(len(postsByUser['2dplox']))
-    print(postsByUser['AccurateObjective'])
-    print(len(postsByUser['AccurateObjective']))
+        userSizeList.append([len(postsByUser[user]), user])
+
+    usersByNumberOfSentences = sorted(userSizeList, reverse=True)
+    print(usersByNumberOfSentences)
+
+    # for user in userList:
+    #     print(user)
+    #     print(len(postsByUser[user]))
+    # print(postsByUser['AccurateObjective'])
+    # print(len(postsByUser['AccurateObjective']))
 
 
 def analyzePosts(userPosts):
