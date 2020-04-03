@@ -25,12 +25,11 @@ def main(directory, numOfUsersToPrint, outputDir):  # directory=sys.argv[1], num
             # file = open(path, 'r', encoding="utf8")
             # print(file)     # prints the name of file
 
-
             examineFile(path, numOfUsersToPrint, outputDir, currentFile)  # send the current file to work
 
             # TODO: change file name to name of user, after list is filled
             # f = open(outputDir + "\\" + currentFile[7:-18] + '.txt', 'w+')  # create a file with name of "file" .txt.  w+ is write privileges
-            # break  # TODO: remove to go over all files. Currently only one file for testings
+            break  # TODO: remove to go over all files. Currently only one file for testings
 
     # print("Total number of files in folder: " + str(os.listdir(directory).__len__()))  # prints number of files
 
@@ -44,7 +43,7 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
     postsByUser = getPosts(filePath, userList)
 
     # TODO: remove list bound for all users. This is just for testings
-    for user in userList:
+    for user in userList[:2]:
         currentUserPosts = postsByUser[user]  # this is an array with all the posts of one user
         userSentences = analyzePosts(currentUserPosts)
 
@@ -56,7 +55,7 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
 
     usersByNumberOfSentences = sorted(userSizeList, reverse=True)
 
-    createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile)
+    # createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile)
 
 
 
@@ -82,10 +81,20 @@ def analyzePosts(userPosts):
 
     userPosts = cleanPosts(userPosts)
     sentences = makeSentences(userPosts)
-    # sentences = tokenize(sentences)
+    sentences = tokenize(sentences)
 
     return sentences
 
+
+def tokenize(tempSentences):
+    sentences = []
+    for sentence in tempSentences:
+        sentences.append(re.sub('(?<=[.,"\'!])(?=[^\s])|(?=[.,"\'!])(?<=[^\s])', ' ', sentence))
+
+    for sentence in sentences:
+        print(sentence)
+
+    return sentences
 
 def cleanPosts(userPosts):
     cleanedPosts = []
