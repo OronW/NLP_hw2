@@ -10,7 +10,7 @@ directory = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Input'  # absolute pat
 outputDir = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Output'  # absolute path of folder
 
 
-def main(directory, numOfUsers, outputDir):  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]
+def main(directory, numOfUsersToPrint, outputDir):  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]
 
     # directory = input()
     print()
@@ -25,7 +25,7 @@ def main(directory, numOfUsers, outputDir):  # directory=sys.argv[1], numOfUsers
             # file = open(path, 'r', encoding="utf8")
             # print(file)     # prints the name of file
 
-            examineFile(path)  # send the current file to work
+            examineFile(path, numOfUsersToPrint)  # send the current file to work
 
             # TODO: change file name to name of user, after list is filled
             f = open(outputDir + "\\" + currentFile[:-4] + '.txt',
@@ -35,7 +35,7 @@ def main(directory, numOfUsers, outputDir):  # directory=sys.argv[1], numOfUsers
     # print("Total number of files in folder: " + str(os.listdir(directory).__len__()))  # prints number of files
 
 
-def examineFile(filePath):
+def examineFile(filePath, numOfUsersToPrint):
     userList = createUserList(filePath)
 
     userSizeList = []
@@ -55,13 +55,11 @@ def examineFile(filePath):
         userSizeList.append([len(postsByUser[user]), user])
 
     usersByNumberOfSentences = sorted(userSizeList, reverse=True)
-    print(usersByNumberOfSentences)
 
-    # for user in userList:
-    #     print(user)
-    #     print(len(postsByUser[user]))
-    # print(postsByUser['AccurateObjective'])
-    # print(len(postsByUser['AccurateObjective']))
+    for i in range(numOfUsersToPrint):
+        for post in postsByUser[usersByNumberOfSentences[i][1]]:
+            print(post.lstrip())
+        print(usersByNumberOfSentences[i][1])
 
 
 def analyzePosts(userPosts):
