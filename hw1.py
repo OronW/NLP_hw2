@@ -25,17 +25,17 @@ def main(directory, numOfUsersToPrint, outputDir):  # directory=sys.argv[1], num
             # file = open(path, 'r', encoding="utf8")
             # print(file)     # prints the name of file
 
-            examineFile(path, numOfUsersToPrint)  # send the current file to work
+
+            examineFile(path, numOfUsersToPrint, outputDir, currentFile)  # send the current file to work
 
             # TODO: change file name to name of user, after list is filled
-            f = open(outputDir + "\\" + currentFile[:-4] + '.txt',
-                     'w+')  # create a file with name of "file" .txt.  w+ is write privileges
-            break  # TODO: remove to go over all files. Currently only one file for testings
+            # f = open(outputDir + "\\" + currentFile[7:-18] + '.txt', 'w+')  # create a file with name of "file" .txt.  w+ is write privileges
+            # break  # TODO: remove to go over all files. Currently only one file for testings
 
     # print("Total number of files in folder: " + str(os.listdir(directory).__len__()))  # prints number of files
 
 
-def examineFile(filePath, numOfUsersToPrint):
+def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
     userList = createUserList(filePath)
 
     userSizeList = []
@@ -56,10 +56,21 @@ def examineFile(filePath, numOfUsersToPrint):
 
     usersByNumberOfSentences = sorted(userSizeList, reverse=True)
 
+    createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile)
+
+
+
+def createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile):
+
+
     for i in range(numOfUsersToPrint):
-        for post in postsByUser[usersByNumberOfSentences[i][1]]:
-            print(post.lstrip())
         print(usersByNumberOfSentences[i][1])
+        f = open(outputDir + "\\" + usersByNumberOfSentences[i][1] + '_' + currentFile[7:-18] + '.txt', 'w+', encoding='utf-8')  # create a file with name of "file" .txt.  w+ is write privileges
+        for post in postsByUser[usersByNumberOfSentences[i][1]]:
+            f.write(post.lstrip()+'\n')
+            # f.write('\n', encoding="utf-8")
+            # print(post.lstrip())
+
 
 
 def analyzePosts(userPosts):
