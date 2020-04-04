@@ -13,7 +13,8 @@ from collections import defaultdict
 def main(directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]):  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]
 
     # directory = input()
-    print()
+    print('*********************************')
+
     numOfUsersToPrint = int(numOfUsers)
 
     if not os.path.exists(outputDir):  # make output dir if not exists
@@ -22,6 +23,8 @@ def main(directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]): 
     for currentFile in os.listdir(directory):
         if currentFile.endswith(".csv"):
             path = directory + '\\' + currentFile
+            print()
+            print('Reading the file: ')
             print(path)
             # file = open(path, 'r', encoding="utf8")
             # print(file)     # prints the name of file
@@ -31,6 +34,7 @@ def main(directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]): 
             # TODO: change file name to name of user, after list is filled
             # f = open(outputDir + "\\" + currentFile[7:-18] + '.txt', 'w+')  # create a file with name of "file" .txt.  w+ is write privileges
             # break  # TODO: remove to go over all files. Currently only one file for testings
+        print('*********************************')
 
     # print("Total number of files in folder: " + str(os.listdir(directory).__len__()))  # prints number of files
 
@@ -62,6 +66,9 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
 
 def createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile):
 
+    print()
+    print('Top ' + str(numOfUsersToPrint) + ' users for this file are: ')
+    print('------------------------------')
 
     for i in range(numOfUsersToPrint):
         print(usersByNumberOfSentences[i][1])
@@ -70,6 +77,11 @@ def createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, o
             f.write(post.lstrip()+'\n')
             # f.write('\n', encoding="utf-8")
             # print(post.lstrip())
+
+    print()
+    print('Files written to:')
+    print(outputDir)
+    print()
 
 
 
@@ -178,9 +190,9 @@ def getPosts(filePath, userList):
         for row in currentFile:
             postsByUser[row[0]].append(row[3])
 
-        print()
-        print('*********************************')
-        print()
+        # print()
+        # print('*********************************')
+        # print()
 
     return postsByUser
 
