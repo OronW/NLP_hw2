@@ -43,7 +43,7 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
     postsByUser = getPosts(filePath, userList)
 
     # TODO: remove list bound for all users. This is just for testings
-    for user in userList[:2]:
+    for user in userList[1:2]:
         currentUserPosts = postsByUser[user]  # this is an array with all the posts of one user
         userSentences = analyzePosts(currentUserPosts)
 
@@ -55,7 +55,7 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
 
     usersByNumberOfSentences = sorted(userSizeList, reverse=True)
 
-    # createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile)
+    # createUsersFiles(1, usersByNumberOfSentences, postsByUser, outputDir, currentFile)
 
 
 
@@ -79,9 +79,13 @@ def analyzePosts(userPosts):
     # for post in userPosts:
     #     print(post)
 
+    # print()
+
     userPosts = cleanPosts(userPosts)
     sentences = makeSentences(userPosts)
     sentences = tokenize(sentences)
+
+    # print()
 
     return sentences
 
@@ -89,12 +93,13 @@ def analyzePosts(userPosts):
 def tokenize(tempSentences):
     sentences = []
     for sentence in tempSentences:
-        sentences.append(re.sub('(?<=[.,"\'!])(?=[^\s])|(?=[.,"\'!])(?<=[^\s])', ' ', sentence))
+        sentences.append(re.sub('(?<=[.,"\'!?:])(?=[^\s])|(?=[.,"\'!?:])(?<=[^\s])', ' ', sentence))
 
-    for sentence in sentences:
-        print(sentence)
+    # for sentence in sentences:
+    #     print(sentence)
 
     return sentences
+
 
 def cleanPosts(userPosts):
     cleanedPosts = []
@@ -105,22 +110,42 @@ def cleanPosts(userPosts):
 
         cleanedPosts.append(currentPost)  # after all is cleaned - append to list
 
+
+    # for post in cleanedPosts:
+    #     print(post.lstrip())
+
     return cleanedPosts
 
 
 def cleanLinks(post):
     cleanedPost = ''
-    splitPost = post.split()
+    splitPost = re.split('\s|;', post)
+
+    # print(splitPost)
+
+    # list of rules to clean
+    regex = [re.compile('^(http|www)')]
+    regex.append(re.compile('[=&%^@#*\[\]]'))
+    # print(regex)
+
+    dontAddPostFlag = False
 
     for i in splitPost:
-        if 'http' not in i and \
-                '@' not in i and \
-                '#' not in i and \
-                '^' not in i and \
-                '*' not in i and \
-                '&gt'not in i and \
-                not i.startswith('['):
+        for j in range(len(regex)):
+            if regex[j].search(i): #and \
+                # '@' not in i and \
+                # '#' not in i and \
+                # '^' not in i and \
+                # '*' not in i and \
+                # '&gt'not in i and \
+                # not i.startswith('[') and\
+                # not i.startswith('(') and\
+                # not i.startswith('|') and\
+                #     not i.startswith('-'):
+                dontAddPostFlag = True
+        if dontAddPostFlag is False:
             cleanedPost = cleanedPost + ' ' + i
+        dontAddPostFlag = False
 
     return cleanedPost
 
@@ -130,8 +155,11 @@ def makeSentences(userPosts):
     start = 0
 
     for post in userPosts:
-        sentences.extend((re.findall('.*?[.?!]+|.+$', post)))     # this regex split the post by relevant characters, or by the end of the line
+        sentences.extend((re.findall('.*?[.?!]+|.+$', post)))     # this regex split the post by relevant characters, or by the end of the line | working old: '.*?[.?!]+|.+$'
 
+
+    for sentence in sentences:
+        print(sentence)
 
     return sentences
 
