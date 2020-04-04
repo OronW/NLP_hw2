@@ -29,7 +29,7 @@ def main(directory, numOfUsersToPrint, outputDir):  # directory=sys.argv[1], num
 
             # TODO: change file name to name of user, after list is filled
             # f = open(outputDir + "\\" + currentFile[7:-18] + '.txt', 'w+')  # create a file with name of "file" .txt.  w+ is write privileges
-            break  # TODO: remove to go over all files. Currently only one file for testings
+            # break  # TODO: remove to go over all files. Currently only one file for testings
 
     # print("Total number of files in folder: " + str(os.listdir(directory).__len__()))  # prints number of files
 
@@ -43,7 +43,7 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
     postsByUser = getPosts(filePath, userList)
 
     # TODO: remove list bound for all users. This is just for testings
-    for user in userList[1:2]:
+    for user in userList:
         currentUserPosts = postsByUser[user]  # this is an array with all the posts of one user
         userSentences = analyzePosts(currentUserPosts)
 
@@ -55,7 +55,7 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
 
     usersByNumberOfSentences = sorted(userSizeList, reverse=True)
 
-    # createUsersFiles(1, usersByNumberOfSentences, postsByUser, outputDir, currentFile)
+    createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile)
 
 
 
@@ -83,6 +83,8 @@ def analyzePosts(userPosts):
 
     userPosts = cleanPosts(userPosts)
     sentences = makeSentences(userPosts)
+    for sentence in sentences:
+        re.sub('\s\s+', ' ',sentence)
     sentences = tokenize(sentences)
 
     # print()
@@ -93,7 +95,7 @@ def analyzePosts(userPosts):
 def tokenize(tempSentences):
     sentences = []
     for sentence in tempSentences:
-        sentences.append(re.sub('(?<=[.,"\'!?:])(?=[^\s])|(?=[.,"\'!?:])(?<=[^\s])', ' ', sentence))
+        sentences.append(re.sub('(?<=[.,"\'!?:’])(?=[^\s])|(?=[.,"\'!?:’])(?<=[^\s])', ' ', sentence))
 
     # for sentence in sentences:
     #     print(sentence)
@@ -114,6 +116,7 @@ def cleanPosts(userPosts):
     # for post in cleanedPosts:
     #     print(post.lstrip())
 
+    # print('*********************')
     return cleanedPosts
 
 
@@ -125,7 +128,8 @@ def cleanLinks(post):
 
     # list of rules to clean
     regex = [re.compile('^(http|www)')]
-    regex.append(re.compile('[=&%^@#*\[\]]'))
+    regex.append(re.compile('[^\w_\'.?!’]'))
+    # regex.append(re.compile('[|~/=&%^@#*\[\]-]'))
     # print(regex)
 
     dontAddPostFlag = False
@@ -155,11 +159,11 @@ def makeSentences(userPosts):
     start = 0
 
     for post in userPosts:
-        sentences.extend((re.findall('.*?[.?!]+|.+$', post)))     # this regex split the post by relevant characters, or by the end of the line | working old: '.*?[.?!]+|.+$'
+        sentences.extend((re.findall('.*?[.?!]+[msMS]?\.?|.+[^\s]', post)))     # this regex split the post by relevant characters, or by the end of the line | working old: '.*?[.?!]+|.+$'
 
 
-    for sentence in sentences:
-        print(sentence)
+    # for sentence in sentences:
+    #     print(sentence)
 
     return sentences
 
