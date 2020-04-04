@@ -4,17 +4,9 @@ import csv
 import re
 from collections import defaultdict
 
-# TODO: make path of directory an input by user before sending
-
-# directory = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Input'  # absolute path of folder
-# outputDir = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Output'  # absolute path of folder
-
 
 def main(directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]):  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]
-
-    # directory = input()
     print('*********************************')
-
     numOfUsersToPrint = int(numOfUsers)
 
     if not os.path.exists(outputDir):  # make output dir if not exists
@@ -26,17 +18,10 @@ def main(directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]): 
             print()
             print('Reading the file: ')
             print(path)
-            # file = open(path, 'r', encoding="utf8")
-            # print(file)     # prints the name of file
 
             examineFile(path, numOfUsersToPrint, outputDir, currentFile)  # send the current file to work
 
-            # TODO: change file name to name of user, after list is filled
-            # f = open(outputDir + "\\" + currentFile[7:-18] + '.txt', 'w+')  # create a file with name of "file" .txt.  w+ is write privileges
-            # break  # TODO: remove to go over all files. Currently only one file for testings
         print('*********************************')
-
-    # print("Total number of files in folder: " + str(os.listdir(directory).__len__()))  # prints number of files
 
 
 def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
@@ -47,15 +32,10 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
     # get posts by user as dictionary. KEY='user'
     postsByUser = getPosts(filePath, userList)
 
-    # TODO: remove list bound for all users. This is just for testings
     for user in userList:
         currentUserPosts = postsByUser[user]  # this is an array with all the posts of one user
         userSentences = analyzePosts(currentUserPosts)
-
-        # for sentence in userSentences:
-        #     print(sentence.lstrip())
         postsByUser[user] = userSentences
-
         userSizeList.append([len(postsByUser[user]), user])
 
     usersByNumberOfSentences = sorted(userSizeList, reverse=True)
@@ -63,9 +43,7 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
     createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile)
 
 
-
 def createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile):
-
     print()
     print('Top ' + str(numOfUsersToPrint) + ' users for this file are: ')
     print('------------------------------')
@@ -75,8 +53,6 @@ def createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, o
         f = open(outputDir + "\\" + usersByNumberOfSentences[i][1] + '_' + currentFile[7:-18] + '.txt', 'w+', encoding='utf-8')  # create a file with name of "file" .txt.  w+ is write privileges
         for post in postsByUser[usersByNumberOfSentences[i][1]]:
             f.write(post.lstrip()+'\n')
-            # f.write('\n', encoding="utf-8")
-            # print(post.lstrip())
 
     print()
     print('Files written to:')
@@ -84,23 +60,14 @@ def createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, o
     print()
 
 
-
 def analyzePosts(userPosts):
-    start = 0
     sentences = []  # this list will contain all the sentences of a user, derived from his/her posts
-
-    # for post in userPosts:
-    #     print(post)
-
-    # print()
 
     userPosts = cleanPosts(userPosts)
     sentences = makeSentences(userPosts)
     for sentence in sentences:
-        re.sub('\s\s+', ' ',sentence)
+        re.sub('\s\s+', ' ', sentence)
     sentences = tokenize(sentences)
-
-    # print()
 
     return sentences
 
@@ -110,9 +77,6 @@ def tokenize(tempSentences):
     for sentence in tempSentences:
         sentences.append(re.sub('(?<=[.,"\'!?:’])(?=[^\s])|(?=[.,"\'!?:’])(?<=[^\s])', ' ', sentence))
 
-    # for sentence in sentences:
-    #     print(sentence)
-
     return sentences
 
 
@@ -121,15 +85,8 @@ def cleanPosts(userPosts):
 
     for post in userPosts:
         currentPost = cleanLinks(post)  # if starts with a URL structure - delete the link
-        # currentPost = cleansymbols(currentPost) # if there is any symbol - delete the "word" between left and right space
-
         cleanedPosts.append(currentPost)  # after all is cleaned - append to list
 
-
-    # for post in cleanedPosts:
-    #     print(post.lstrip())
-
-    # print('*********************')
     return cleanedPosts
 
 
@@ -137,31 +94,20 @@ def cleanLinks(post):
     cleanedPost = ''
     splitPost = re.split('\s|;', post)
 
-    # print(splitPost)
-
     # list of rules to clean
     regex = [re.compile('^(http|www)')]
     regex.append(re.compile('[^\w_\'.?!’]'))
-    # regex.append(re.compile('[|~/=&%^@#*\[\]-]'))
-    # print(regex)
 
     dontAddPostFlag = False
 
     for i in splitPost:
         for j in range(len(regex)):
-            if regex[j].search(i): #and \
-                # '@' not in i and \
-                # '#' not in i and \
-                # '^' not in i and \
-                # '*' not in i and \
-                # '&gt'not in i and \
-                # not i.startswith('[') and\
-                # not i.startswith('(') and\
-                # not i.startswith('|') and\
-                #     not i.startswith('-'):
+            if regex[j].search(i):
                 dontAddPostFlag = True
+
         if dontAddPostFlag is False:
             cleanedPost = cleanedPost + ' ' + i
+
         dontAddPostFlag = False
 
     return cleanedPost
@@ -169,14 +115,9 @@ def cleanLinks(post):
 
 def makeSentences(userPosts):
     sentences = []
-    start = 0
 
     for post in userPosts:
         sentences.extend((re.findall('.*?[.?!]+[msMS]?\.?|.+[^\s]', post)))     # this regex split the post by relevant characters, or by the end of the line | working old: '.*?[.?!]+|.+$'
-
-
-    # for sentence in sentences:
-    #     print(sentence)
 
     return sentences
 
@@ -189,10 +130,6 @@ def getPosts(filePath, userList):
 
         for row in currentFile:
             postsByUser[row[0]].append(row[3])
-
-        # print()
-        # print('*********************************')
-        # print()
 
     return postsByUser
 
