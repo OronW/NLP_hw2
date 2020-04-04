@@ -6,14 +6,15 @@ from collections import defaultdict
 
 # TODO: make path of directory an input by user before sending
 
-directory = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Input'  # absolute path of folder
-outputDir = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Output'  # absolute path of folder
+# directory = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Input'  # absolute path of folder
+# outputDir = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Output'  # absolute path of folder
 
 
-def main(directory, numOfUsersToPrint, outputDir):  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]
+def main(directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]):  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]
 
     # directory = input()
     print()
+    numOfUsersToPrint = int(numOfUsers)
 
     if not os.path.exists(outputDir):  # make output dir if not exists
         os.makedirs(outputDir)
@@ -199,4 +200,4 @@ def createUserList(filePath):
     return userList
 
 
-main(directory, 3, outputDir)
+main()
