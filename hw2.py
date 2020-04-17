@@ -17,7 +17,8 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
     if not os.path.exists(outputDir):  # make output dir if not exists
         os.makedirs(outputDir)
 
-    for currentFile in os.listdir(directory):
+    # TODO: remove list boundry. currently only 1 file
+    for currentFile in os.listdir(directory)[:1]:
         if currentFile.endswith(".csv"):
             path = directory + '\\' + currentFile
             print()
@@ -47,17 +48,42 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
 
     createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile)
 
+    calcTokenProbability(outputDir)
+
+
+def calcTokenProbability(outputDir):
+
+    tokenProb = {}
+
+    for currentFile in os.listdir(outputDir):
+        if currentFile.endswith(".txt"):
+            path = outputDir + '\\' + currentFile
+            print(path)
+            with open(path, 'r', encoding='utf-8') as file:
+                for line in file:
+                    for word in line.split():
+                        if word.lower() not in tokenProb:
+                            tokenProb[word.lower()] = 1
+                        else:
+                            tokenProb[word.lower()] += 1
+    tokenProb['<unk>'] = 1
+
+    for token in tokenProb:
+        print(token, ' : ', tokenProb[token])
+    print('Len of dic is: ' + str(len(tokenProb)))
+
+
 
 def createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile):
     print()
     print('Top ' + str(numOfUsersToPrint) + ' users for this file are: ')
     print('------------------------------')
 
+    f = open(outputDir + "\\" + 'TopUsers' + '_' + currentFile[7:-18] + '.txt', 'w+', encoding='utf-8')  # create a file with name of "file" .txt.  w+ is write privileges
     for i in range(numOfUsersToPrint):
         print(usersByNumberOfSentences[i][1])
-        f = open(outputDir + "\\" + 'TopUsers' + '_' + currentFile[7:-18] + '.txt', 'a+', encoding='utf-8')  # create a file with name of "file" .txt.  w+ is write privileges
         for post in postsByUser[usersByNumberOfSentences[i][1]]:
-            f.write(post.lstrip()+'\n')
+            f.write(post.lstrip() + ' ' + '<end>' + '\n')
 
     print()
     print('Files written to:')
