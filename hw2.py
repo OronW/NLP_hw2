@@ -4,8 +4,13 @@ import csv
 import re
 from collections import defaultdict
 
+# input files directory: C:\Users\oron.werner\PycharmProjects\NLP\hw1Input
+directory = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Input'
+outputDir = r'C:\Users\oron.werner\PycharmProjects\NLP\hw2Output'
+numOfUsers = 10
 
-def main(directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]):  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]
+
+def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]
     print('*********************************')
     numOfUsersToPrint = int(numOfUsers)
 
@@ -50,7 +55,7 @@ def createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, o
 
     for i in range(numOfUsersToPrint):
         print(usersByNumberOfSentences[i][1])
-        f = open(outputDir + "\\" + usersByNumberOfSentences[i][1] + '_' + currentFile[7:-18] + '.txt', 'w+', encoding='utf-8')  # create a file with name of "file" .txt.  w+ is write privileges
+        f = open(outputDir + "\\" + 'TopUsers' + '_' + currentFile[7:-18] + '.txt', 'a+', encoding='utf-8')  # create a file with name of "file" .txt.  w+ is write privileges
         for post in postsByUser[usersByNumberOfSentences[i][1]]:
             f.write(post.lstrip()+'\n')
 
