@@ -1,3 +1,4 @@
+import math
 import sys
 import os
 import csv
@@ -53,18 +54,24 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
 
 def calcTokenProbability(outputDir):
 
-    tokenAppearance, totalWords = createTokenAppearanceDict(outputDir)
+    tokenAppearance, totalWords = createTokenAppearanceDict(outputDir)  # return a token appearance dict, and the total number of words
 
-    for k in sorted(tokenAppearance, key=tokenAppearance.get, reverse=True):
-        print(k, tokenAppearance[k])
+    # for k in sorted(tokenAppearance, key=tokenAppearance.get, reverse=True):
+    #     print(k, tokenAppearance[k])
 
     vocabularySize = len(tokenAppearance)
     print('Len of dic is: ' + str(len(tokenAppearance)))
     print(totalWords)
 
-    tokenProbabilityInFile
-    reconstructedTokenCount
+    tokenProbabilityInFile = tokenAppearance.copy()
+
+    for token in tokenProbabilityInFile:
+        tokenProbabilityInFile[token] = tokenAppearance[token]/(totalWords + vocabularySize)
+    # reconstructedTokenCount
 #     TODO: Check if should work with log
+    for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=True):
+        print(k, math.log2(tokenProbabilityInFile[k]))
+
 
 
 def createTokenAppearanceDict(outputDir):
@@ -80,10 +87,11 @@ def createTokenAppearanceDict(outputDir):
                     for word in line.split():
                         totalWords += 1
                         if word.lower() not in tokenAppearance:
-                            tokenAppearance[word.lower()] = 1
+                            tokenAppearance[word.lower()] = 2   # added another 1 for laplace smoothing
                         else:
                             tokenAppearance[word.lower()] += 1
-    tokenAppearance['<unk>'] = 1
+    tokenAppearance['<unk>'] = 1    # added the unknown token for laplace smoothing
+    totalWords += 1     # unknown token was added to vocabulary
 
     return tokenAppearance, totalWords
 
