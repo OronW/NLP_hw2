@@ -53,19 +53,23 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
 
 def calcTokenProbability(outputDir):
 
-    tokenProb, totalWords = createTokenDict(outputDir)
+    tokenAppearance, totalWords = createTokenAppearanceDict(outputDir)
 
-    for k in sorted(tokenProb, key=tokenProb.get, reverse=True):
-        print(k, tokenProb[k])
+    for k in sorted(tokenAppearance, key=tokenAppearance.get, reverse=True):
+        print(k, tokenAppearance[k])
 
-    vocabularySize = len(tokenProb)
-    print('Len of dic is: ' + str(len(tokenProb)))
+    vocabularySize = len(tokenAppearance)
+    print('Len of dic is: ' + str(len(tokenAppearance)))
     print(totalWords)
 
+    tokenProbabilityInFile
+    reconstructedTokenCount
+#     TODO: Check if should work with log
 
-def createTokenDict(outputDir):
+
+def createTokenAppearanceDict(outputDir):
     totalWords = 0
-    tokenProb = {}
+    tokenAppearance = {}
 
     for currentFile in os.listdir(outputDir):
         if currentFile.endswith(".txt"):
@@ -75,13 +79,13 @@ def createTokenDict(outputDir):
                 for line in file:
                     for word in line.split():
                         totalWords += 1
-                        if word.lower() not in tokenProb:
-                            tokenProb[word.lower()] = 1
+                        if word.lower() not in tokenAppearance:
+                            tokenAppearance[word.lower()] = 1
                         else:
-                            tokenProb[word.lower()] += 1
-    tokenProb['<unk>'] = 1
+                            tokenAppearance[word.lower()] += 1
+    tokenAppearance['<unk>'] = 1
 
-    return tokenProb, totalWords
+    return tokenAppearance, totalWords
 
 
 
