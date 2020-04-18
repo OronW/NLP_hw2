@@ -89,10 +89,12 @@ def calcTokenProbability(totalCorpus):
 
     # calcSentenceProbability(tokenProbabilityInFile)
 
-    for i in range(5):
+    print('\nUnigrams model based on complete dataset:')
+    for i in range(3):
         sentence = createRandomizedSentenceByDistribution(tokenProbabilityInFile)
         for word in sentence:
-            print(word + ' ', end=' ')
+            print(word + ' ', end='')
+        print()
 
 
 def createRandomizedSentenceByDistribution(tokenProbabilityInFile):
