@@ -14,27 +14,39 @@ numOfUsers = 10
 def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]
     print('*********************************')
     numOfUsersToPrint = int(numOfUsers)
+    totalCorpus = []
 
     if not os.path.exists(outputDir):  # make output dir if not exists
         os.makedirs(outputDir)
 
-    # TODO: remove list boundry. currently only 1 file
-    for currentFile in os.listdir(directory)[:1]:
+    for currentFile in os.listdir(directory):
         if currentFile.endswith(".csv"):
             path = directory + '\\' + currentFile
             print()
             print('Reading the file: ')
             print(path)
 
-            examineFile(path, numOfUsersToPrint, outputDir, currentFile)  # send the current file to work
+            corpus = examineFile(path, numOfUsersToPrint, outputDir, currentFile)  # send the current file to work
+            totalCorpus += corpus
 
         print('*********************************')
+
+    # TODO: remove file creation before sending. For testing purpose only
+    f = open(outputDir + "\\" + 'test' + '.txt', 'w+', encoding='utf-8')   # creates a file with all users for testings
+    for line in totalCorpus:
+        f.write(line)
+        f.write('\n')
+
+
+    calcTokenProbability(totalCorpus)
+
 
 
 def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
     userList = createUserList(filePath)
 
     userSizeList = []
+    corpus = []
 
     # get posts by user as dictionary. KEY='user'
     postsByUser = getPosts(filePath, userList)
@@ -47,54 +59,95 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
 
     usersByNumberOfSentences = sorted(userSizeList, reverse=True)
 
-    createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile)
+    corpus = createCorpus(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile)
+    # createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile)
 
-    calcTokenProbability(outputDir)
+    return corpus
 
 
-def calcTokenProbability(outputDir):
+def calcTokenProbability(totalCorpus):
 
-    tokenAppearance, totalWords = createTokenAppearanceDict(outputDir)  # return a token appearance dict, and the total number of words
+    tokenAppearance, totalWords = createTokenAppearanceDict(totalCorpus)  # return a token appearance dict, and the total number of words
 
     # for k in sorted(tokenAppearance, key=tokenAppearance.get, reverse=True):
     #     print(k, tokenAppearance[k])
 
     vocabularySize = len(tokenAppearance)
     print('Len of dic is: ' + str(len(tokenAppearance)))
-    print(totalWords)
+    print('Total number of words: ' + str(totalWords))
 
     tokenProbabilityInFile = tokenAppearance.copy()
 
     for token in tokenProbabilityInFile:
-        tokenProbabilityInFile[token] = tokenAppearance[token]/(totalWords + vocabularySize)
+        tokenProbabilityInFile[token] = math.log10(tokenAppearance[token]/(totalWords + vocabularySize))
     # reconstructedTokenCount
 #     TODO: Check if should work with log
-    for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=True):
-        print(k, math.log2(tokenProbabilityInFile[k]))
+    for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=False):
+        print(k, tokenProbabilityInFile[k])
+
+    calcSentenceProbability(tokenProbabilityInFile)
 
 
+def calcSentenceProbability(tokenProbabilityInFile):
 
-def createTokenAppearanceDict(outputDir):
+    probabilitySum = 0  # this will calculate the sum of the Log2 probabilities for the sentence
+    sentence1 = 'I don \' t think so . . .'
+
+    sentenceToCalc = sentence1.split()
+    for word in sentenceToCalc:
+        if word.lower() not in tokenProbabilityInFile:
+            print('\nWord: ' + word.lower() + ' ,not in dictionary. Changed to <unk>\n')
+            word = '<unk>'
+        probabilitySum += tokenProbabilityInFile[word.lower()]
+
+    print('\nSentence: \"' + sentence1 + '\" probability is: ' + str(math.exp(probabilitySum)))
+
+
+def createTokenAppearanceDict(totalCorpus):
     totalWords = 0
     tokenAppearance = {}
 
-    for currentFile in os.listdir(outputDir):
-        if currentFile.endswith(".txt"):
-            path = outputDir + '\\' + currentFile
-            print(path)
-            with open(path, 'r', encoding='utf-8') as file:
-                for line in file:
-                    for word in line.split():
-                        totalWords += 1
-                        if word.lower() not in tokenAppearance:
-                            tokenAppearance[word.lower()] = 2   # added another 1 for laplace smoothing
-                        else:
-                            tokenAppearance[word.lower()] += 1
+    # for currentFile in os.listdir(outputDir):
+    #     if currentFile.endswith(".txt"):
+    #         path = outputDir + '\\' + currentFile
+    #         print(path)
+    #         with open(path, 'r', encoding='utf-8') as file:
+
+    # TODO: remove list limitation
+    for line in totalCorpus:
+        for word in line.split():
+            totalWords += 1
+            if word.lower() not in tokenAppearance:
+                tokenAppearance[word.lower()] = 2   # added another 1 for laplace smoothing
+            else:
+                tokenAppearance[word.lower()] += 1
+
     tokenAppearance['<unk>'] = 1    # added the unknown token for laplace smoothing
     totalWords += 1     # unknown token was added to vocabulary
 
+    # print(tokenAppearance)
+
     return tokenAppearance, totalWords
 
+
+def createCorpus(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile):
+
+    corpus = []
+
+    print()
+    print('Top ' + str(numOfUsersToPrint) + ' users for this file are: ')
+    print('------------------------------')
+
+    for i in range(numOfUsersToPrint):
+        print(usersByNumberOfSentences[i][1])
+        for post in postsByUser[usersByNumberOfSentences[i][1]]:
+            corpus.append(post.lstrip() + ' ' + '<end>')
+
+    return corpus
+    # print(corpus)
+    # f = open(outputDir + "\\" + 'test' + '_' + currentFile[7:-18] + '.txt', 'w+', encoding='utf-8')   #   creates a file with all users for testings
+    # for line in corpus:
+    #     f.write(line + '\n')
 
 
 def createUsersFiles(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outputDir, currentFile):
