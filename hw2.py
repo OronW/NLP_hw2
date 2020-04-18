@@ -82,8 +82,8 @@ def calcTokenProbability(totalCorpus):
         tokenProbabilityInFile[token] = math.log10(tokenAppearance[token]/(totalWords + vocabularySize))
     # reconstructedTokenCount
 #     TODO: Check if should work with log
-    for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=False):
-        print(k, tokenProbabilityInFile[k])
+#     for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=False):
+#         print(k, tokenProbabilityInFile[k])
 
     calcSentenceProbability(tokenProbabilityInFile)
 
@@ -91,16 +91,22 @@ def calcTokenProbability(totalCorpus):
 def calcSentenceProbability(tokenProbabilityInFile):
 
     probabilitySum = 0  # this will calculate the sum of the Log2 probabilities for the sentence
-    sentence1 = 'I don \' t think so . . .'
+    sentences = []
 
-    sentenceToCalc = sentence1.split()
-    for word in sentenceToCalc:
-        if word.lower() not in tokenProbabilityInFile:
-            print('\nWord: ' + word.lower() + ' ,not in dictionary. Changed to <unk>\n')
-            word = '<unk>'
-        probabilitySum += tokenProbabilityInFile[word.lower()]
+    sentences.append('I don \' t think so . . .')
+    sentences.append('Fake news !')
+    sentences.append('There is no place like home .')
+    sentences.append('Aabbcc hello abc')
 
-    print('\nSentence: \"' + sentence1 + '\" probability is: ' + str(math.exp(probabilitySum)))
+    for sentence in sentences:
+        sentenceToCalc = sentence.split()
+        for word in sentenceToCalc:
+            if word.lower() not in tokenProbabilityInFile:
+                print('\nWord: ' + word.lower() + ' ,not in dictionary. Changed to <unk>\n')
+                word = '<unk>'
+            probabilitySum += tokenProbabilityInFile[word.lower()]
+        print('\nSentence: \"' + sentence + '\" probability is: ' + str(math.exp(probabilitySum)))
+
 
 
 def createTokenAppearanceDict(totalCorpus):
