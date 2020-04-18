@@ -53,6 +53,18 @@ def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
 
 def calcTokenProbability(outputDir):
 
+    tokenProb, totalWords = createTokenDict(outputDir)
+
+    for k in sorted(tokenProb, key=tokenProb.get, reverse=True):
+        print(k, tokenProb[k])
+
+    vocabularySize = len(tokenProb)
+    print('Len of dic is: ' + str(len(tokenProb)))
+    print(totalWords)
+
+
+def createTokenDict(outputDir):
+    totalWords = 0
     tokenProb = {}
 
     for currentFile in os.listdir(outputDir):
@@ -62,15 +74,14 @@ def calcTokenProbability(outputDir):
             with open(path, 'r', encoding='utf-8') as file:
                 for line in file:
                     for word in line.split():
+                        totalWords += 1
                         if word.lower() not in tokenProb:
                             tokenProb[word.lower()] = 1
                         else:
                             tokenProb[word.lower()] += 1
     tokenProb['<unk>'] = 1
 
-    for token in tokenProb:
-        print(token, ' : ', tokenProb[token])
-    print('Len of dic is: ' + str(len(tokenProb)))
+    return tokenProb, totalWords
 
 
 
