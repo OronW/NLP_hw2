@@ -4,8 +4,10 @@ import os
 import csv
 import re
 from collections import defaultdict
+import random
 
 # input files directory: C:\Users\oron.werner\PycharmProjects\NLP\hw1Input
+
 directory = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Input'
 outputDir = r'C:\Users\oron.werner\PycharmProjects\NLP\hw2Output'
 numOfUsers = 10
@@ -79,13 +81,41 @@ def calcTokenProbability(totalCorpus):
     tokenProbabilityInFile = tokenAppearance.copy()
 
     for token in tokenProbabilityInFile:
-        tokenProbabilityInFile[token] = math.log10(tokenAppearance[token]/(totalWords + vocabularySize))
+        tokenProbabilityInFile[token] = (tokenAppearance[token]/(totalWords + vocabularySize))
     # reconstructedTokenCount
 #     TODO: Check if should work with log
 #     for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=False):
 #         print(k, tokenProbabilityInFile[k])
 
-    calcSentenceProbability(tokenProbabilityInFile)
+    # calcSentenceProbability(tokenProbabilityInFile)
+
+    for i in range(5):
+        sentence = createRandomizedSentenceByDistribution(tokenProbabilityInFile)
+        for word in sentence:
+            print(word + ' ', end=' ')
+
+
+def createRandomizedSentenceByDistribution(tokenProbabilityInFile):
+    sentence = []
+    word = '<start>'
+    while word != '<end>':
+        word = randomWordByDistribution(tokenProbabilityInFile)
+        sentence.append(word)
+    return sentence
+
+
+def randomWordByDistribution(tokenProbabilityInFile):
+    rand_val = random.random()
+    # print('rand value is: ' + str(rand_val))
+    total = 0
+    # word = '<start>'
+
+    # while word != '<end>':
+    for k, v in tokenProbabilityInFile.items():
+        total += v
+        if rand_val <= total:
+            return k
+    assert False, 'unreachable'
 
 
 def calcSentenceProbability(tokenProbabilityInFile):
@@ -104,8 +134,11 @@ def calcSentenceProbability(tokenProbabilityInFile):
             if word.lower() not in tokenProbabilityInFile:
                 print('\nWord: ' + word.lower() + ' ,not in dictionary. Changed to <unk>\n')
                 word = '<unk>'
-            probabilitySum += tokenProbabilityInFile[word.lower()]
-        print('\nSentence: \"' + sentence + '\" probability is: ' + str(math.exp(probabilitySum)))
+            if probabilitySum == 0:
+                probabilitySum = tokenProbabilityInFile[word.lower()]
+            else:
+                probabilitySum *= tokenProbabilityInFile[word.lower()]
+        print('\nSentence: \"' + sentence + '\" probability is: ' + str((probabilitySum)))
 
 
 
