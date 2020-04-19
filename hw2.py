@@ -17,6 +17,7 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
     print('*********************************')
     numOfUsersToPrint = int(numOfUsers)
     totalCorpus = []
+    tempCorpus = []
 
     if not os.path.exists(outputDir):  # make output dir if not exists
         os.makedirs(outputDir)
@@ -34,15 +35,24 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
 
         print('*********************************')
 
+
+    for line in totalCorpus:
+        tempLine = line.rstrip()
+        tempLine += ' <end>\n'
+
+        # print(tempLine)
+        tempCorpus.append(tempLine)
+
+    # print(tempCorpus)
+
+    totalCorpus = tempCorpus
+
     # TODO: remove file creation before sending. For testing purpose only
     f = open(outputDir + "\\" + 'test' + '.txt', 'w+', encoding='utf-8')   # creates a file with all users for testings
     for line in totalCorpus:
-        data = line.replace('\n', ' <end>\n')
-        f.write(data)
+        f.write(line)
 
-
-    # calcTokenProbability(totalCorpus)
-
+    calcTokenProbability(totalCorpus)
 
 
 def examineFile(filePath, numOfUsersToPrint, outputDir, currentFile):
@@ -72,8 +82,8 @@ def calcTokenProbability(totalCorpus):
 
     tokenAppearance, totalWords = createTokenAppearanceDict(totalCorpus)  # return a token appearance dict, and the total number of words
 
-    # for k in sorted(tokenAppearance, key=tokenAppearance.get, reverse=True):
-    #     print(k, tokenAppearance[k])
+    for k in sorted(tokenAppearance, key=tokenAppearance.get, reverse=False):
+        print(k, tokenAppearance[k])
 
     vocabularySize = len(tokenAppearance)
     print('Len of dic is: ' + str(len(tokenAppearance)))
