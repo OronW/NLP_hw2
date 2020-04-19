@@ -8,7 +8,7 @@ import random
 
 # input files directory: C:\Users\oron.werner\PycharmProjects\NLP\hw1Input
 
-directory = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Input'
+directory = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Output'
 outputDir = r'C:\Users\oron.werner\PycharmProjects\NLP\hw2Output'
 numOfUsers = 10
 
@@ -22,25 +22,26 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
         os.makedirs(outputDir)
 
     for currentFile in os.listdir(directory):
-        if currentFile.endswith(".csv"):
+        if currentFile.endswith(".txt"):
             path = directory + '\\' + currentFile
             print()
             print('Reading the file: ')
             print(path)
 
-            corpus = examineFile(path, numOfUsersToPrint, outputDir, currentFile)  # send the current file to work
-            totalCorpus += corpus
+            # corpus = examineFile(path, numOfUsersToPrint, outputDir, currentFile)  # send the current file to work
+            f = open(path, 'r', encoding='utf-8')
+            totalCorpus += f
 
         print('*********************************')
 
     # TODO: remove file creation before sending. For testing purpose only
     f = open(outputDir + "\\" + 'test' + '.txt', 'w+', encoding='utf-8')   # creates a file with all users for testings
     for line in totalCorpus:
-        f.write(line)
-        f.write('\n')
+        data = line.replace('\n', ' <end>\n')
+        f.write(data)
 
 
-    calcTokenProbability(totalCorpus)
+    # calcTokenProbability(totalCorpus)
 
 
 
@@ -175,9 +176,10 @@ def createCorpus(numOfUsersToPrint, usersByNumberOfSentences, postsByUser, outpu
 
     corpus = []
 
-    print()
-    print('Top ' + str(numOfUsersToPrint) + ' users for this file are: ')
-    print('------------------------------')
+    # print()
+    # print('Top ' + str(numOfUsersToPrint) + ' users for this file are: ')
+    # print('------------------------------')
+
 
     for i in range(numOfUsersToPrint):
         print(usersByNumberOfSentences[i][1])
