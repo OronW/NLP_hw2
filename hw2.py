@@ -82,8 +82,8 @@ def calcTokenProbability(totalCorpus):
 
     tokenAppearance, totalWords = createTokenAppearanceDict(totalCorpus)  # return a token appearance dict, and the total number of words
 
-    for k in sorted(tokenAppearance, key=tokenAppearance.get, reverse=False):
-        print(k, tokenAppearance[k])
+    # for k in sorted(tokenAppearance, key=tokenAppearance.get, reverse=False):
+    #     print(k, tokenAppearance[k])
 
     vocabularySize = len(tokenAppearance)
     print('Len of dic is: ' + str(len(tokenAppearance)))
@@ -100,6 +100,7 @@ def calcTokenProbability(totalCorpus):
 
     # calcSentenceProbability(tokenProbabilityInFile)
 
+    # TODO: uncomment all these lines for normal use before sending
     print('\nUnigrams model based on complete dataset:')
     for i in range(3):
         sentence = createRandomizedSentenceByDistribution(tokenProbabilityInFile)
@@ -145,13 +146,15 @@ def calcSentenceProbability(tokenProbabilityInFile):
         sentenceToCalc = sentence.split()
         for word in sentenceToCalc:
             if word.lower() not in tokenProbabilityInFile:
-                print('\nWord: ' + word.lower() + ' ,not in dictionary. Changed to <unk>\n')
+                print('\n*****************************************************************')
+                print('Word: \'' + word.lower() + '\' is not in dictionary. Changed to <unk>')
+                print('*****************************************************************')
                 word = '<unk>'
             if probabilitySum == 0:
                 probabilitySum = tokenProbabilityInFile[word.lower()]
             else:
                 probabilitySum *= tokenProbabilityInFile[word.lower()]
-        print('\nSentence: \"' + sentence + '\" probability is: ' + str((probabilitySum)))
+        print('\nSentence: \"' + sentence + '\" | probability is: ' + str((probabilitySum)))
 
 
 
