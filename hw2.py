@@ -29,7 +29,6 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
             print('Reading the file: ')
             print(path)
 
-            # corpus = examineFile(path, numOfUsersToPrint, outputDir, currentFile)  # send the current file to work
             f = open(path, 'r', encoding='utf-8')
             totalCorpus += f
 
@@ -43,8 +42,6 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
         # print(tempLine)
         tempCorpus.append(tempLine)
 
-    # print(tempCorpus)
-
     totalCorpus = tempCorpus
 
     # TODO: remove file creation before sending. For testing purpose only
@@ -52,8 +49,10 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
     for line in totalCorpus:
         f.write(line)
 
-    calcTokenProbability(totalCorpus)
-
+    tokenProbabilityInFile = calcTokenProbability(totalCorpus)  # for unigram calculation
+    # calcSentenceProbability(tokenProbabilityInFile)
+    print('\nUnigrams model based on complete dataset:')
+    printRandomizedSentenceByDistribution(tokenProbabilityInFile)
 
 
 def calcTokenProbability(totalCorpus):
@@ -76,10 +75,12 @@ def calcTokenProbability(totalCorpus):
 #     for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=False):
 #         print(k, tokenProbabilityInFile[k])
 
-    # calcSentenceProbability(tokenProbabilityInFile)
+    return tokenProbabilityInFile
 
 
-    print('\nUnigrams model based on complete dataset:')
+
+def printRandomizedSentenceByDistribution(tokenProbabilityInFile):
+
     for i in range(3):
         sentence = createRandomizedSentenceByDistribution(tokenProbabilityInFile)
         for word in sentence:
@@ -89,7 +90,7 @@ def calcTokenProbability(totalCorpus):
 
 def createRandomizedSentenceByDistribution(tokenProbabilityInFile):
     sentence = []
-    word = '<start>'
+    word = ''
     while word != '<end>':
         word = randomWordByDistribution(tokenProbabilityInFile)
         sentence.append(word)
