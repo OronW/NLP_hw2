@@ -74,19 +74,19 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
 
 def calcTokenProbabilityBigram(totalCorpus):
 
-    tokenAppearance, totalWords = createTokenAppearanceDictBigram(totalCorpus)  # return a token appearance dict, and the total number of words
+    tokenAppearance, totalBigrams = createTokenAppearanceDictBigram(totalCorpus)  # return a token appearance dict, and the total number of words
 
     for k in sorted(tokenAppearance, key=tokenAppearance.get, reverse=False):
         print(k, tokenAppearance[k])
 
     vocabularySize = len(tokenAppearance)
-    print('Len of dic is: ' + str(len(tokenAppearance)))
-    print('Total number of words: ' + str(totalWords))
+    print('Len of dict is: ' + str(len(tokenAppearance)))
+    print('Total number of Bigrams: ' + str(totalBigrams))
 
     tokenProbabilityInFile = tokenAppearance.copy()
 
     for token in tokenProbabilityInFile:
-        tokenProbabilityInFile[token] = (tokenAppearance[token]/(totalWords + vocabularySize))
+        tokenProbabilityInFile[token] = (tokenAppearance[token]/(totalBigrams + vocabularySize))
     # reconstructedTokenCount
 #     TODO: Check if should work with log
 #     for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=False):
@@ -100,11 +100,11 @@ def createTokenAppearanceDictBigram(totalCorpus):
     tokenAppearance = {}
 
     # TODO: remove list limitation
-    for line in totalCorpus[:100]:
+    for line in totalCorpus:
         for word, nextWord in zip(line.split()[:-1], line.split()[1:]):
-            totalBigrams += 1
             if word.lower() + ' ' + nextWord.lower() not in tokenAppearance:
                 tokenAppearance[word.lower() + ' ' + nextWord.lower()] = 2   # added another 1 for laplace smoothing
+                totalBigrams += 1
             else:
                 tokenAppearance[word.lower() + ' ' + nextWord.lower()] += 1
 
@@ -126,7 +126,7 @@ def calcTokenProbability(totalCorpus):
     #     print(k, tokenAppearance[k])
 
     vocabularySize = len(tokenAppearance)
-    print('Len of dic is: ' + str(len(tokenAppearance)))
+    print('Len of dict is: ' + str(len(tokenAppearance)))
     print('Total number of words: ' + str(totalWords))
 
     tokenProbabilityInFile = tokenAppearance.copy()
