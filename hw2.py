@@ -71,6 +71,7 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
 
     bigramProbabilityInFile = calcTokenProbabilityBigram(totalCorpus, unigramTotalAppearance)
     # bigramSentenceProbability(bigramProbabilityInFile, unigramProbabilityInFile)
+    print()
     printRandomizedSentenceByDistribution(bigramProbabilityInFile, 'bigrams')
 
 
@@ -211,9 +212,10 @@ def createRandomizedSentenceByDistribution(tokenProbabilityInFile, nGrams):
     elif nGrams == 'bigrams':
         # print('in bigrams')
         bigram = 't <start>'
+        sentence.append('<start>')
         while bigram.split()[1] != '<end>':
             bigram = randomBigramByDistribution(tokenProbabilityInFile, bigram.split()[1])
-            sentence.append(bigram)
+            sentence.append(bigram.split()[1])
 
     return sentence
 
@@ -223,28 +225,17 @@ def randomBigramByDistribution(tokenProbabilityInFile, lastWord):
     total = 0
     newDict = {}
 
-    # print(tokenProbabilityInFile)
-
     for key in tokenProbabilityInFile:
         if key.startswith(lastWord):
             newDict[key] = tokenProbabilityInFile[key]
 
-    # for k in sorted(newDict, key=newDict.get, reverse=False):
-    #     print(k, newDict[k])
-    keys = newDict.keys()
-    # print(keys)
     values = list(newDict.values())
     valuesSum = sum(values)
-    newvalues = [x / valuesSum for x in values]
-    # splitList = [i.split() for i in newvalues]
 
+    # normalize bigram distribution
     for key in newDict:
         newDict[key] = newDict[key] / valuesSum
 
-    # print(values)
-
-    # bigram = np.random.choice(list(keys), 1, replace=True, p=newvalues)
-    # return bigram
     for k, v in newDict.items():
         total += v
         if rand_val <= total:
