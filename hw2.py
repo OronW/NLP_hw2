@@ -47,10 +47,10 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
 
 
     # Creating sentences for Unigrams
-    # tokenProbabilityInFile = calcTokenProbability(totalCorpus)  # for unigram calculation
+    unigramProbabilityInFile, unigramTotalAppearance = calcTokenProbability(totalCorpus)  # for unigram calculation
     # calcSentenceProbability(tokenProbabilityInFile)   # only for the specific sentences probability calculation
     # print('\nUnigrams model based on complete dataset:')
-    # printRandomizedSentenceByDistribution(tokenProbabilityInFile)
+    # printRandomizedSentenceByDistribution(unigramProbabilityInFile)
 
 
 
@@ -64,35 +64,44 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
         tempCorpus.append(tempLine)
     totalCorpus = tempCorpus
 
-    # TODO: remove file creation before sending. For testing purpose only
-    f = open(outputDir + "\\" + 'test' + '.txt', 'w+', encoding='utf-8')  # creates a file with all users for testings
-    for line in totalCorpus:
-        f.write(line)
+    # # TODO: remove file creation before sending. For testing purpose only
+    # f = open(outputDir + "\\" + 'test' + '.txt', 'w+', encoding='utf-8')  # creates a file with all users for testings
+    # for line in totalCorpus:
+    #     f.write(line)
 
-    tokenProbabilityInFile = calcTokenProbabilityBigram(totalCorpus)
+    bigramProbabilityInFile = calcTokenProbabilityBigram(totalCorpus, unigramTotalAppearance)
+    for k in sorted(bigramProbabilityInFile, key=bigramProbabilityInFile.get, reverse=False):
+        print(k, bigramProbabilityInFile[k])
 
 
-def calcTokenProbabilityBigram(totalCorpus):
 
-    tokenAppearance, totalBigrams = createTokenAppearanceDictBigram(totalCorpus)  # return a token appearance dict, and the total number of words
+def calcTokenProbabilityBigram(totalCorpus, unigramTotalAppearance):
 
-    for k in sorted(tokenAppearance, key=tokenAppearance.get, reverse=False):
-        print(k, tokenAppearance[k])
+    bigramAppearance, totalBigramsNum = createTokenAppearanceDictBigram(totalCorpus)  # return a token appearance dict, and the total number of words
 
-    vocabularySize = len(tokenAppearance)
-    print('Len of dict is: ' + str(len(tokenAppearance)))
-    print('Total number of Bigrams: ' + str(totalBigrams))
+    # for k in sorted(tokenAppearance, key=tokenAppearance.get, reverse=False):
+    #     print(k, tokenAppearance[k])
 
-    tokenProbabilityInFile = tokenAppearance.copy()
+    vocabularySize = len(bigramAppearance)
+    print('Len of dict is: ' + str(len(bigramAppearance)))
+    print('Total number of Bigrams: ' + str(totalBigramsNum))
 
-    for token in tokenProbabilityInFile:
-        tokenProbabilityInFile[token] = (tokenAppearance[token]/(totalBigrams + vocabularySize))
+    bigramProbabilityInFile = bigramAppearance.copy()
+
+    for token in bigramProbabilityInFile:
+        if token.split()[0] in unigramTotalAppearance:
+            # print(token + ' | ' + token.split()[0])
+            bigramProbabilityInFile[token] = (bigramAppearance[token]/(unigramTotalAppearance[token.split()[0]] + vocabularySize))
+        else:
+            bigramProbabilityInFile[token] = (bigramAppearance[token] / (unigramTotalAppearance['<unk>'] + vocabularySize))
+            # TODO: add case of call back -> use unknown token
+
     # reconstructedTokenCount
 #     TODO: Check if should work with log
 #     for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=False):
 #         print(k, tokenProbabilityInFile[k])
 
-    return tokenProbabilityInFile
+    return bigramProbabilityInFile
 
 
 def createTokenAppearanceDictBigram(totalCorpus):
@@ -108,8 +117,8 @@ def createTokenAppearanceDictBigram(totalCorpus):
             else:
                 tokenAppearance[word.lower() + ' ' + nextWord.lower()] += 1
 
-    tokenAppearance['<unk>'] = 1    # added the unknown token for laplace smoothing
-    totalBigrams += 1     # unknown token was added to vocabulary
+    # tokenAppearance['<unk>'] = 1    # added the unknown token for laplace smoothing
+    # totalBigrams += 1     # unknown token was added to vocabulary
 
     # print(tokenAppearance)
 
@@ -130,15 +139,19 @@ def calcTokenProbability(totalCorpus):
     print('Total number of words: ' + str(totalWords))
 
     tokenProbabilityInFile = tokenAppearance.copy()
+    tokenReconstructedCounts = tokenProbabilityInFile.copy()
 
     for token in tokenProbabilityInFile:
         tokenProbabilityInFile[token] = (tokenAppearance[token]/(totalWords + vocabularySize))
+
+    for token in tokenReconstructedCounts:
+        tokenReconstructedCounts[token] = (tokenAppearance[token]/(totalWords + vocabularySize)) * totalWords
     # reconstructedTokenCount
 #     TODO: Check if should work with log
 #     for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=False):
 #         print(k, tokenProbabilityInFile[k])
 
-    return tokenProbabilityInFile
+    return tokenProbabilityInFile, tokenAppearance
 
 
 
