@@ -5,6 +5,7 @@ import csv
 import re
 from collections import defaultdict
 import random
+import numpy as np
 
 # input files directory: C:\Users\oron.werner\PycharmProjects\NLP\hw1Input
 
@@ -48,9 +49,9 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
 
     # Creating sentences for Unigrams
     unigramProbabilityInFile, unigramTotalAppearance = calcTokenProbability(totalCorpus)  # for unigram calculation
-    unigramSentenceProbability(unigramProbabilityInFile)   # only for the specific sentences probability calculation
+    # unigramSentenceProbability(unigramProbabilityInFile)   # only for the specific sentences probability calculation
     # print('\nUnigrams model based on complete dataset:')
-    printRandomizedSentenceByDistribution(unigramProbabilityInFile)
+    # printRandomizedSentenceByDistribution(unigramProbabilityInFile, 'unigrams')
 
 
     # Creating sentences for Bigrams
@@ -69,7 +70,8 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
     #     f.write(line)
 
     bigramProbabilityInFile = calcTokenProbabilityBigram(totalCorpus, unigramTotalAppearance)
-    bigramSentenceProbability(bigramProbabilityInFile, unigramProbabilityInFile)
+    # bigramSentenceProbability(bigramProbabilityInFile, unigramProbabilityInFile)
+    printRandomizedSentenceByDistribution(bigramProbabilityInFile, 'bigrams')
 
 
 def bigramSentenceProbability(bigramProbabilityInFile, unigramProbabilityInFile):
@@ -188,22 +190,66 @@ def calcTokenProbability(totalCorpus):
 
 
 
-def printRandomizedSentenceByDistribution(tokenProbabilityInFile):
+def printRandomizedSentenceByDistribution(tokenProbabilityInFile, nGrams):
 
     for i in range(3):
-        sentence = createRandomizedSentenceByDistribution(tokenProbabilityInFile)
+        sentence = createRandomizedSentenceByDistribution(tokenProbabilityInFile, nGrams)
         for word in sentence:
             print(word + ' ', end='')
         print()
 
 
-def createRandomizedSentenceByDistribution(tokenProbabilityInFile):
+def createRandomizedSentenceByDistribution(tokenProbabilityInFile, nGrams):
     sentence = []
-    word = ''
-    while word != '<end>':
-        word = randomWordByDistribution(tokenProbabilityInFile)
-        sentence.append(word)
+    if nGrams == 'unigrams':
+        print('in unigrams')
+        word = ''
+        while word != '<end>':
+            word = randomWordByDistribution(tokenProbabilityInFile)
+            sentence.append(word)
+
+    elif nGrams == 'bigrams':
+        # print('in bigrams')
+        bigram = 't <start>'
+        while bigram.split()[1] != '<end>':
+            bigram = randomBigramByDistribution(tokenProbabilityInFile, bigram.split()[1])
+            sentence.append(bigram)
+
     return sentence
+
+
+def randomBigramByDistribution(tokenProbabilityInFile, lastWord):
+    rand_val = random.random()
+    total = 0
+    newDict = {}
+
+    # print(tokenProbabilityInFile)
+
+    for key in tokenProbabilityInFile:
+        if key.startswith(lastWord):
+            newDict[key] = tokenProbabilityInFile[key]
+
+    # for k in sorted(newDict, key=newDict.get, reverse=False):
+    #     print(k, newDict[k])
+    keys = newDict.keys()
+    # print(keys)
+    values = list(newDict.values())
+    valuesSum = sum(values)
+    newvalues = [x / valuesSum for x in values]
+    # splitList = [i.split() for i in newvalues]
+
+    for key in newDict:
+        newDict[key] = newDict[key] / valuesSum
+
+    # print(values)
+
+    # bigram = np.random.choice(list(keys), 1, replace=True, p=newvalues)
+    # return bigram
+    for k, v in newDict.items():
+        total += v
+        if rand_val <= total:
+            return k
+    assert False, 'unreachable'
 
 
 def randomWordByDistribution(tokenProbabilityInFile):
