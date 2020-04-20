@@ -48,10 +48,9 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
 
     # Creating sentences for Unigrams
     unigramProbabilityInFile, unigramTotalAppearance = calcTokenProbability(totalCorpus)  # for unigram calculation
-    # calcSentenceProbability(tokenProbabilityInFile)   # only for the specific sentences probability calculation
+    unigramSentenceProbability(unigramProbabilityInFile)   # only for the specific sentences probability calculation
     # print('\nUnigrams model based on complete dataset:')
-    # printRandomizedSentenceByDistribution(unigramProbabilityInFile)
-
+    printRandomizedSentenceByDistribution(unigramProbabilityInFile)
 
 
     # Creating sentences for Bigrams
@@ -70,8 +69,42 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
     #     f.write(line)
 
     bigramProbabilityInFile = calcTokenProbabilityBigram(totalCorpus, unigramTotalAppearance)
-    for k in sorted(bigramProbabilityInFile, key=bigramProbabilityInFile.get, reverse=False):
-        print(k, bigramProbabilityInFile[k])
+    bigramSentenceProbability(bigramProbabilityInFile, unigramProbabilityInFile)
+
+
+def bigramSentenceProbability(bigramProbabilityInFile, unigramProbabilityInFile):
+
+    probability = 0
+    probabilitySum = 0  # this will calculate the sum of the Log2 probabilities for the sentence
+    sentences = []
+
+    sentences.append('<start> when dogs fly . <end>')
+    sentences.append('<start> Fake news ! <end>')
+    sentences.append('<start> this is the best thing ever . <end>')
+    sentences.append('<start> Aabbcc hello abc <end>')
+
+    for sentence in sentences:
+        sentenceToCalc = sentence
+        for word, nextWord in zip(sentenceToCalc.split()[:-1], sentenceToCalc.split()[1:]):
+            if word.lower() + ' ' + nextWord.lower() not in bigramProbabilityInFile:
+                print('*****************************************************************')
+                print('Bigram: \'' + word.lower() + ' ' + nextWord.lower() + '\' is not in bigram dictionary. Calc as unigram')
+                print('*****************************************************************')
+
+                if nextWord.lower() not in unigramProbabilityInFile:    # if also not in unigram - address as unknown
+                    nextWord = '<unk>'
+                probability = unigramProbabilityInFile[nextWord.lower()]
+
+            else:
+                probability = bigramProbabilityInFile[word.lower() + ' ' + nextWord.lower()]
+
+            if probabilitySum == 0:
+                probabilitySum = probability
+            else:
+                probabilitySum *= probability
+
+        print('\nSentence: \"' + sentence + '\" | probability is: ' + str(probabilitySum))
+
 
 
 
@@ -79,8 +112,8 @@ def calcTokenProbabilityBigram(totalCorpus, unigramTotalAppearance):
 
     bigramAppearance, totalBigramsNum = createTokenAppearanceDictBigram(totalCorpus)  # return a token appearance dict, and the total number of words
 
-    # for k in sorted(tokenAppearance, key=tokenAppearance.get, reverse=False):
-    #     print(k, tokenAppearance[k])
+    # for k in sorted(bigramProbabilityInFile, key=bigramProbabilityInFile.get, reverse=False):
+    #     print(k, bigramProbabilityInFile[k])
 
     vocabularySize = len(bigramAppearance)
     print('Len of dict is: ' + str(len(bigramAppearance)))
@@ -187,28 +220,28 @@ def randomWordByDistribution(tokenProbabilityInFile):
     assert False, 'unreachable'
 
 
-def calcSentenceProbability(tokenProbabilityInFile):
+def unigramSentenceProbability(unigramProbabilityInFile):
 
     probabilitySum = 0  # this will calculate the sum of the Log2 probabilities for the sentence
     sentences = []
 
-    sentences.append('I don \' t think so . . .')
-    sentences.append('Fake news !')
-    sentences.append('There is no place like home .')
-    sentences.append('Aabbcc hello abc')
+    sentences.append('I don \' t think so . . . <end>')
+    sentences.append('Fake news ! <end>')
+    sentences.append('There is no place like home . <end>')
+    sentences.append('Aabbcc hello abc <end>')
 
     for sentence in sentences:
         sentenceToCalc = sentence.split()
         for word in sentenceToCalc:
-            if word.lower() not in tokenProbabilityInFile:
+            if word.lower() not in unigramProbabilityInFile:
                 print('\n*****************************************************************')
                 print('Word: \'' + word.lower() + '\' is not in dictionary. Changed to <unk>')
                 print('*****************************************************************')
                 word = '<unk>'
             if probabilitySum == 0:
-                probabilitySum = tokenProbabilityInFile[word.lower()]
+                probabilitySum = unigramProbabilityInFile[word.lower()]
             else:
-                probabilitySum *= tokenProbabilityInFile[word.lower()]
+                probabilitySum *= unigramProbabilityInFile[word.lower()]
         print('\nSentence: \"' + sentence + '\" | probability is: ' + str((probabilitySum)))
 
 
