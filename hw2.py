@@ -296,14 +296,13 @@ def createRandomizedSentenceByDistribution(tokenProbabilityInFile, nGrams, secon
 
 
     elif nGrams == 'trigrams':
-        print('In trigrams')
-
+        # print('In trigrams')
         trigram = 't '
         bigram = 't <start>'
         bigram = randomBigramByDistribution(secondaryProb, bigram.split()[1])
-        sentence.append('<start>' + bigram.split()[1])
+        sentence.append('<start> ' + bigram.split()[1])
         trigram += bigram
-        print('trigram+bigram: ' + trigram)
+        # print('trigram+bigram: ' + trigram)
 
         while trigram.split()[2] != '<end>':
             trigram = randomBigramByDistribution(tokenProbabilityInFile, trigram.split()[1] + ' ' + trigram.split()[2])
