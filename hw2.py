@@ -5,7 +5,6 @@ import csv
 import re
 from collections import defaultdict
 import random
-import numpy as np
 
 # input files directory: C:\Users\oron.werner\PycharmProjects\NLP\hw1Input
 
@@ -13,10 +12,100 @@ directory = r'C:\Users\oron.werner\PycharmProjects\NLP\hw1Output'
 outputDir = r'C:\Users\oron.werner\PycharmProjects\NLP\hw2Output'
 numOfUsers = 10
 
-# TODO: creats system args for inputDir and file path before sending
+
+# TODO: creates system args for inputDir and file path before sending
 def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv[3]
     print('*********************************')
     numOfUsersToPrint = int(numOfUsers)
+    totalCorpus = createCorpus(directory, outputDir)
+    # --------------------------------------------------------------------------------------------------------------
+    # Creating sentences for Unigrams
+    unigramProbabilityInFile, unigramTotalAppearance = calcTokenProbability(totalCorpus)  # for unigram calculation
+    # unigramSentenceProbability(unigramProbabilityInFile)   # only for the specific sentences probability calculation
+    # print('\nUnigrams model based on complete dataset:')
+    # printRandomizedSentenceByDistribution(unigramProbabilityInFile, 'unigrams')
+    # --------------------------------------------------------------------------------------------------------------
+
+    # Creating sentences for Bigrams
+    tempCorpus = []
+    for line in totalCorpus:
+        tempLine = line.rstrip()
+        tempLine = '<start> ' + tempLine + '\n'
+        tempCorpus.append(tempLine)
+    totalCorpus = tempCorpus
+
+    # # TODO: remove file creation before sending. For testing purpose only
+    # f = open(outputDir + "\\" + 'test' + '.txt', 'w+', encoding='utf-8')  # creates a file with all users for testings
+    # for line in totalCorpus:
+    #     f.write(line)
+
+    # --------------------------------------------------------------------------------------------------------------
+    bigramProbabilityInFile, bigramTotalAppearance = calcTokenProbabilityBigram(totalCorpus, unigramTotalAppearance)
+    # bigramSentenceProbability(bigramProbabilityInFile, unigramProbabilityInFile)
+    print()
+    # printRandomizedSentenceByDistribution(bigramProbabilityInFile, 'bigrams')
+
+
+    trigramProbabilityInFile = calcTokenProbabilityTrigram(totalCorpus, unigramTotalAppearance, bigramTotalAppearance)
+
+
+
+
+
+def calcTokenProbabilityTrigram(totalCorpus, unigramTotalAppearance, bigramTotalAppearance):
+
+    trigramAppearance, totalTrigramsNum = createTokenAppearanceDictTrigram(totalCorpus)  # return a token appearance dict, and the total number of words
+
+    # for k in sorted(trigramAppearance, key=trigramAppearance.get, reverse=False):
+    #     print(k, trigramAppearance[k])
+
+    vocabularySize = len(trigramAppearance)
+    print('Len of dict is: ' + str(len(trigramAppearance)))
+    print('Total number of Trigrams: ' + str(totalTrigramsNum))
+
+    trigramProbabilityInFile = trigramAppearance.copy()
+
+    for token in trigramProbabilityInFile:
+        if token.split()[0] + ' ' + token.split()[1] in bigramTotalAppearance:
+            print(token + ' | ' + token.split()[0] + ' ' + token.split()[1])
+            trigramProbabilityInFile[token] = (trigramProbabilityInFile[token]/(bigramTotalAppearance[token.split()[0] + ' ' + token.split()[1]] + vocabularySize))
+        # else:
+        #     trigramProbabilityInFile[token] = (trigramProbabilityInFile[token] / (bigramTotalAppearance['<unk>'] + vocabularySize))
+    #         # TODO: add case of call back -> use unknown token
+
+    # reconstructedTokenCount
+#     TODO: Check if should work with log
+#     for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=False):
+#         print(k, tokenProbabilityInFile[k])
+
+    return trigramProbabilityInFile
+
+
+
+def createTokenAppearanceDictTrigram(totalCorpus):
+    totalTrigrams = 0
+    tokenAppearance = {}
+
+
+    for line in totalCorpus:
+        for word, nextWord, nextNext in zip(line.split()[:-2], line.split()[1:-1], line.split()[2:]):
+            if word.lower() + ' ' + nextWord.lower() + ' ' + nextNext.lower() not in tokenAppearance:
+                tokenAppearance[word.lower() + ' ' + nextWord.lower() + ' ' + nextNext.lower()] = 2   # added another 1 for laplace smoothing
+                totalTrigrams += 1
+            else:
+                tokenAppearance[word.lower() + ' ' + nextWord.lower() + ' ' + nextNext.lower()] += 1
+
+    # tokenAppearance['<unk>'] = 1    # added the unknown token for laplace smoothing
+    # totalBigrams += 1     # unknown token was added to vocabulary
+
+    # print(tokenAppearance)
+
+    return tokenAppearance, totalTrigrams
+
+
+
+
+def createCorpus(directory, outputDir):
     totalCorpus = []
     tempCorpus = []
 
@@ -35,7 +124,6 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
 
         print('*********************************')
 
-
     for line in totalCorpus:
         tempLine = line.rstrip()
         tempLine += ' <end>\n'
@@ -44,35 +132,7 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
         tempCorpus.append(tempLine)
 
     totalCorpus = tempCorpus
-
-
-
-    # Creating sentences for Unigrams
-    unigramProbabilityInFile, unigramTotalAppearance = calcTokenProbability(totalCorpus)  # for unigram calculation
-    # unigramSentenceProbability(unigramProbabilityInFile)   # only for the specific sentences probability calculation
-    # print('\nUnigrams model based on complete dataset:')
-    # printRandomizedSentenceByDistribution(unigramProbabilityInFile, 'unigrams')
-
-
-    # Creating sentences for Bigrams
-    tempCorpus = []
-    for line in totalCorpus:
-        tempLine = line.rstrip()
-        tempLine = '<start> ' + tempLine + '\n'
-
-        # print(tempLine)
-        tempCorpus.append(tempLine)
-    totalCorpus = tempCorpus
-
-    # # TODO: remove file creation before sending. For testing purpose only
-    # f = open(outputDir + "\\" + 'test' + '.txt', 'w+', encoding='utf-8')  # creates a file with all users for testings
-    # for line in totalCorpus:
-    #     f.write(line)
-
-    bigramProbabilityInFile = calcTokenProbabilityBigram(totalCorpus, unigramTotalAppearance)
-    # bigramSentenceProbability(bigramProbabilityInFile, unigramProbabilityInFile)
-    print()
-    printRandomizedSentenceByDistribution(bigramProbabilityInFile, 'bigrams')
+    return totalCorpus
 
 
 def bigramSentenceProbability(bigramProbabilityInFile, unigramProbabilityInFile):
@@ -137,7 +197,7 @@ def calcTokenProbabilityBigram(totalCorpus, unigramTotalAppearance):
 #     for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=False):
 #         print(k, tokenProbabilityInFile[k])
 
-    return bigramProbabilityInFile
+    return bigramProbabilityInFile, bigramAppearance
 
 
 def createTokenAppearanceDictBigram(totalCorpus):
