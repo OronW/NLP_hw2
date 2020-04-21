@@ -46,15 +46,18 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
     # printRandomizedSentenceByDistribution(bigramProbabilityInFile, 'bigrams')
 
 
-    trigramProbabilityInFile = calcTokenProbabilityTrigram(totalCorpus, unigramTotalAppearance, bigramTotalAppearance)
+    trigramProbabilityInFile = calcTokenProbabilityTrigram(totalCorpus, unigramTotalAppearance, bigramTotalAppearance, unigramProbabilityInFile, bigramProbabilityInFile)
+    print()
+    printRandomizedSentenceByDistribution(trigramProbabilityInFile, 'trigrams', bigramProbabilityInFile)
 
 
 
 
-
-def calcTokenProbabilityTrigram(totalCorpus, unigramTotalAppearance, bigramTotalAppearance):
+def calcTokenProbabilityTrigram(totalCorpus, unigramTotalAppearance, bigramTotalAppearance, unigramProbabilityInFile, bigramProbabilityInFile):
 
     trigramAppearance, totalTrigramsNum = createTokenAppearanceDictTrigram(totalCorpus)  # return a token appearance dict, and the total number of words
+
+    linearInterTrigram = {}
 
     # for k in sorted(trigramAppearance, key=trigramAppearance.get, reverse=False):
     #     print(k, trigramAppearance[k])
@@ -67,16 +70,30 @@ def calcTokenProbabilityTrigram(totalCorpus, unigramTotalAppearance, bigramTotal
 
     for token in trigramProbabilityInFile:
         if token.split()[0] + ' ' + token.split()[1] in bigramTotalAppearance:
-            print(token + ' | ' + token.split()[0] + ' ' + token.split()[1])
+            # print(token + ' | ' + token.split()[0] + ' ' + token.split()[1])
             trigramProbabilityInFile[token] = (trigramProbabilityInFile[token]/(bigramTotalAppearance[token.split()[0] + ' ' + token.split()[1]] + vocabularySize))
-        # else:
-        #     trigramProbabilityInFile[token] = (trigramProbabilityInFile[token] / (bigramTotalAppearance['<unk>'] + vocabularySize))
+        else:
+            trigramProbabilityInFile[token] = (trigramProbabilityInFile[token] / (unigramTotalAppearance['<unk>'] + vocabularySize))
     #         # TODO: add case of call back -> use unknown token
+
+        if token.split()[1] + ' ' + token.split()[2] in bigramProbabilityInFile:
+            linearBigram = bigramProbabilityInFile[token.split()[1] + ' ' + token.split()[2]]
+        else:
+            linearBigram = unigramProbabilityInFile['<unk>']    # TODO: create backoff in bigram calculation
+
+        if token.split()[2] in unigramProbabilityInFile:
+            linearUnigram = unigramProbabilityInFile[token.split()[2]]
+        else:
+            linearUnigram = unigramProbabilityInFile['<unk>']
+
+        linearSum = trigramProbabilityInFile[token] + linearBigram + linearUnigram
+
+        linearInterTrigram[token] = (0.7/linearSum * trigramProbabilityInFile[token]) + (0.2/linearSum * linearBigram) + (0.1/linearSum * linearUnigram)
 
     # reconstructedTokenCount
 #     TODO: Check if should work with log
-#     for k in sorted(tokenProbabilityInFile, key=tokenProbabilityInFile.get, reverse=False):
-#         print(k, tokenProbabilityInFile[k])
+#     for k in sorted(linearInterTrigram, key=linearInterTrigram.get, reverse=False):
+#         print(k, linearInterTrigram[k])
 
     return trigramProbabilityInFile
 
@@ -251,16 +268,16 @@ def calcTokenProbability(totalCorpus):
 
 
 
-def printRandomizedSentenceByDistribution(tokenProbabilityInFile, nGrams):
+def printRandomizedSentenceByDistribution(tokenProbabilityInFile, nGrams, secondaryProb={}):
 
     for i in range(3):
-        sentence = createRandomizedSentenceByDistribution(tokenProbabilityInFile, nGrams)
+        sentence = createRandomizedSentenceByDistribution(tokenProbabilityInFile, nGrams, secondaryProb)
         for word in sentence:
             print(word + ' ', end='')
         print()
 
 
-def createRandomizedSentenceByDistribution(tokenProbabilityInFile, nGrams):
+def createRandomizedSentenceByDistribution(tokenProbabilityInFile, nGrams, secondaryProb):
     sentence = []
     if nGrams == 'unigrams':
         print('in unigrams')
@@ -276,6 +293,21 @@ def createRandomizedSentenceByDistribution(tokenProbabilityInFile, nGrams):
         while bigram.split()[1] != '<end>':
             bigram = randomBigramByDistribution(tokenProbabilityInFile, bigram.split()[1])
             sentence.append(bigram.split()[1])
+
+
+    elif nGrams == 'trigrams':
+        print('In trigrams')
+
+        trigram = 't '
+        bigram = 't <start>'
+        bigram = randomBigramByDistribution(secondaryProb, bigram.split()[1])
+        sentence.append('<start>' + bigram.split()[1])
+        trigram += bigram
+        print('trigram+bigram: ' + trigram)
+
+        while trigram.split()[2] != '<end>':
+            trigram = randomBigramByDistribution(tokenProbabilityInFile, trigram.split()[1] + ' ' + trigram.split()[2])
+            sentence.append(trigram.split()[2])
 
     return sentence
 
