@@ -44,16 +44,21 @@ def main():  # directory=sys.argv[1], numOfUsers=sys.argv[2], outputDir=sys.argv
     # bigramSentenceProbability(bigramProbabilityInFile, unigramProbabilityInFile)
     print()
     # printRandomizedSentenceByDistribution(bigramProbabilityInFile, 'bigrams')
-
-
-    trigramProbabilityInFile = calcTokenProbabilityTrigram(totalCorpus, unigramTotalAppearance, bigramTotalAppearance, unigramProbabilityInFile, bigramProbabilityInFile)
-    print()
-    printRandomizedSentenceByDistribution(trigramProbabilityInFile, 'trigrams', bigramProbabilityInFile)
+    # --------------------------------------------------------------------------------------------------------------
 
 
 
+    # --------------------------------------------------------------------------------------------------------------
+    trigramProbabilityInFile = calcTokenProbabilityTrigram(totalCorpus, bigramTotalAppearance, unigramProbabilityInFile, bigramProbabilityInFile)
+    # print()
+    trigramSentenceProbability(trigramProbabilityInFile, bigramProbabilityInFile, unigramProbabilityInFile)
+    # printRandomizedSentenceByDistribution(trigramProbabilityInFile, 'trigrams', bigramProbabilityInFile)
 
-def calcTokenProbabilityTrigram(totalCorpus, unigramTotalAppearance, bigramTotalAppearance, unigramProbabilityInFile, bigramProbabilityInFile):
+    # --------------------------------------------------------------------------------------------------------------
+
+
+
+def calcTokenProbabilityTrigram(totalCorpus, bigramTotalAppearance, unigramProbabilityInFile, bigramProbabilityInFile):
 
     trigramAppearance, totalTrigramsNum = createTokenAppearanceDictTrigram(totalCorpus)  # return a token appearance dict, and the total number of words
 
@@ -71,29 +76,41 @@ def calcTokenProbabilityTrigram(totalCorpus, unigramTotalAppearance, bigramTotal
     for token in trigramProbabilityInFile:
         if token.split()[0] + ' ' + token.split()[1] in bigramTotalAppearance:
             # print(token + ' | ' + token.split()[0] + ' ' + token.split()[1])
-            trigramProbabilityInFile[token] = (trigramProbabilityInFile[token]/(bigramTotalAppearance[token.split()[0] + ' ' + token.split()[1]] + vocabularySize))
+            trigramProbabilityInFile[token] = (trigramAppearance[token]/(bigramTotalAppearance[token.split()[0] + ' ' + token.split()[1]] + vocabularySize))
         else:
-            trigramProbabilityInFile[token] = (trigramProbabilityInFile[token] / (unigramTotalAppearance['<unk>'] + vocabularySize))
-    #         # TODO: add case of call back -> use unknown token
+            trigramProbabilityInFile[token] = (unigramProbabilityInFile['<unk>'])
 
-        if token.split()[1] + ' ' + token.split()[2] in bigramProbabilityInFile:
-            linearBigram = bigramProbabilityInFile[token.split()[1] + ' ' + token.split()[2]]
-        else:
-            linearBigram = unigramProbabilityInFile['<unk>']    # TODO: create backoff in bigram calculation
+        # ---------------------------------------------------------------------
+        # This part was used to calculate linear interpolation
+        # ***********************************************************
 
-        if token.split()[2] in unigramProbabilityInFile:
-            linearUnigram = unigramProbabilityInFile[token.split()[2]]
-        else:
-            linearUnigram = unigramProbabilityInFile['<unk>']
+        # if token.split()[1] + ' ' + token.split()[2] in bigramProbabilityInFile:
+        #     linearBigram = bigramProbabilityInFile[token.split()[1] + ' ' + token.split()[2]]
+        # else:
+        #     linearBigram = unigramProbabilityInFile['<unk>']
+        #
+        # if token.split()[2] in unigramProbabilityInFile:
+        #     linearUnigram = unigramProbabilityInFile[token.split()[2]]
+        # else:
+        #     linearUnigram = unigramProbabilityInFile['<unk>']
+        #
+        # linearSum = trigramProbabilityInFile[token] + linearBigram + linearUnigram
+        #
+        #
+        # linearUnigram /= linearSum
+        # linearBigram /= linearSum
+        # linearTrigram = trigramProbabilityInFile[token] / linearSum
+        #
+        # linearUnigram = (0.1) * linearUnigram
+        # linearBigram = (0.2) * linearBigram
+        # linearTrigram = (0.7) * linearTrigram
+        #
+        # linearTotal = (linearTrigram + linearBigram + linearUnigram)
+        # linearInterTrigram[token] = linearTotal
+        # ---------------------------------------------------------------------
 
-        linearSum = trigramProbabilityInFile[token] + linearBigram + linearUnigram
-
-        linearInterTrigram[token] = (0.7/linearSum * trigramProbabilityInFile[token]) + (0.2/linearSum * linearBigram) + (0.1/linearSum * linearUnigram)
-
-    # reconstructedTokenCount
-#     TODO: Check if should work with log
-#     for k in sorted(linearInterTrigram, key=linearInterTrigram.get, reverse=False):
-#         print(k, linearInterTrigram[k])
+#     for k in sorted(trigramProbabilityInFile, key=trigramProbabilityInFile.get, reverse=False):
+#         print(k, trigramProbabilityInFile[k])
 
     return trigramProbabilityInFile
 
@@ -150,6 +167,53 @@ def createCorpus(directory, outputDir):
 
     totalCorpus = tempCorpus
     return totalCorpus
+
+
+
+def trigramSentenceProbability(trigramProbabilityInFile, bigramProbabilityInFile, unigramProbabilityInFile):
+
+    probability = 0
+    probabilitySum = 0
+    sentences = []
+
+    sentences.append('<start> this is the best thing ever ! <end>')
+    sentences.append('<start> i am addicted to math . <end>')
+    sentences.append('<start> fake news ... <end>')
+    sentences.append('<start> Aabbcc hello abc <end>')
+
+
+    for sentence in sentences:
+        sentenceToCalc = sentence
+        for word, nextWord, nextNext in zip(sentenceToCalc.split()[:-2], sentenceToCalc.split()[1:-1], sentenceToCalc.split()[2:]):
+            if word.lower() + ' ' + nextWord.lower() + ' ' + nextNext.lower() not in trigramProbabilityInFile:
+                # print('*****************************************************************')
+                # print('Trigram: \'' + word.lower() + ' ' + nextWord.lower() + ' ' + nextNext.lower() + '\' is not in trigram dictionary. Calc as bigram')
+                # print('*****************************************************************')
+
+                if word.lower() + ' ' + nextWord.lower() not in bigramProbabilityInFile:
+                    # print('*****************************************************************')
+                    # print('Bigram: \'' + word.lower() + ' ' + nextWord.lower() + '\' is not in bigram dictionary. Calc as unigram')
+                    # print('*****************************************************************')
+
+                    if nextWord.lower() not in unigramProbabilityInFile:  # if also not in unigram - address as unknown
+                        nextWord = '<unk>'
+                    probability = unigramProbabilityInFile[nextWord.lower()]
+
+                else:
+                    probability = bigramProbabilityInFile[word.lower() + ' ' + nextWord.lower()]
+
+            else:
+                probability = trigramProbabilityInFile[word.lower() + ' ' + nextWord.lower() + ' ' + nextNext.lower()]
+
+
+            if probabilitySum == 0:
+                probabilitySum = probability
+            else:
+                probabilitySum *= probability
+
+        print('\nSentence: \"' + sentence + '\" | probability is: ' + str(probabilitySum))
+
+
 
 
 def bigramSentenceProbability(bigramProbabilityInFile, unigramProbabilityInFile):
